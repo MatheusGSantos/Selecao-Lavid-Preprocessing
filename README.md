@@ -1,2 +1,2 @@
 # Selecao-Lavid-Preprocessing
-Temp
+Usado corpora 1 atualizado
