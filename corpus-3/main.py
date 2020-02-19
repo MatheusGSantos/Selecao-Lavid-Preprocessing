@@ -1,45 +1,32 @@
-def get_inner_words(string):
-    """
-    Return string without directional
-    """
-    return string[3:-3]
+import re
 
 
-def verb_check(string):
-    """
-    Returns true if string contains a verb
-    """
-    string = string.split('_')
-    for word in string:
-        if word[-1] == 'R':
-            return True    
-    return False
-
-
-# load possibilities
-direcionais = open("direcionais.txt", 'r')
-dire_lst = [l[:-1].split(',') for l in direcionais]
-direcionais.close()
-
-def string_filter_and_swap(sentence, filt_l, out_f):
-    """Compose and write all the possible strings containing the pattern. Supports recursive calls for multiple ocurrences in the same sentence.
-    
+def string_dir_swap(sentence, matches, out_f):
+    """Compose and write all the possible strings containing the pattern.
     Arguments:
         sentence {string}
-        filt_l {list of strings that correspond to pattern}
+        matches {list of matches to pattern}
         out_f {output file}
     """
-    for each_element in filt_l:
-        word = get_inner_words(each_element)
-        if verb_check(word):
-            for i in range(36): # 36 casos
-                start = sentence.find(each_element) - 1
-                end = len(each_element)+start+1
-                sent = sentence[:start+1]+dire_lst[i][0]+'_'+word+'_'+dire_lst[i][1]+sentence[end:]
-                if each_element == filt_l[len(filt_l)-1]:
-                    output.write(sent)
-                else:
-                    string_filter_and_swap(sent, filt_l[1:], out_f)
+    for each_element in matches:
+        start = ''
+        end = ''
+        for j in range(4): # first and last S or P
+            for k in range(1,4): # first 1, 2 or 3
+                for l in range(1,4): # last 1, 2 or 3
+                    if j<2: # first S or P
+                        start = 'S'
+                    else:
+                        start = 'P'
+                    if j % 2: # last S or P
+                        end = 'P'
+                    else:
+                        end = 'S'
+                    start = str(k)+start+'_'
+                    end = '_'+str(l)+end
+                    final_ver = sentence[ : each_element.span()[0]-3 ] + start + sentence[ each_element.span()[0] : each_element.span()[1] ] + end + sentence[ each_element.span()[1]+3:]
+                    out_f.write(final_ver)
+
                 
 
 
@@ -49,7 +36,7 @@ with open("corpus-q3.csv", 'r') as input_file:
     next(input_file) # skip first row
     file_text = (line for line in input_file) # creates a generator to iterate over input_file lines
     for each_sentence in file_text:
-        filtered = [x for x in each_sentence.split(' ') if x[0].isdigit()] # split in " " and get only the elements that start with a digit
-        string_filter_and_swap(each_sentence,filtered,output)
+        matches = list(re.finditer(r'(?<=(1|2|3)(S|P)_)[A-Z_]+R(?=_(1|2|3)(S|P))',each_sentence)) # find directional pattern matches
+        string_dir_swap(each_sentence,matches,output)
 
 output.close()
