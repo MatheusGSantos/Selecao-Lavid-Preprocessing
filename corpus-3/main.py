@@ -5,7 +5,7 @@ def string_dir_swap(sentence, matches, out_f):
     """Compose and write all the possible strings containing the pattern.
     Arguments:
         sentence {string}
-        matches {list of matches to pattern}
+        matches {list of pattern matches}
         out_f {output file}
     """
     for each_element in matches:
@@ -29,14 +29,14 @@ def string_dir_swap(sentence, matches, out_f):
 
                 
 
-
+pattern = r'(?<=(1|2|3)(S|P)_)[A-Z_]+R(?=_(1|2|3)(S|P))' # match ex.: 1S_AMAR_2S
 output = open("output.txt", 'w')
 
 with open("corpus-q3.csv", 'r') as input_file:
     next(input_file) # skip first row
     file_text = (line for line in input_file) # creates a generator to iterate over input_file lines
     for each_sentence in file_text:
-        matches = list(re.finditer(r'(?<=(1|2|3)(S|P)_)[A-Z_]+R(?=_(1|2|3)(S|P))',each_sentence)) # find directional pattern matches
+        matches = list(re.finditer(pattern ,each_sentence)) # find directional pattern matches
         string_dir_swap(each_sentence,matches,output)
 
 output.close()
